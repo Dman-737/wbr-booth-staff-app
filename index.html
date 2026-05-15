@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WBR Booth Staff Report</title>
+<style>
+  :root {
+    --ink: #111827;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --bg: #ffffff;
+    --soft: #f9fafb;
+    --green: #16a34a;
+    --green-hover: #15803d;
+    --eg-purple: #6938EF;
+    --pill-bg: #f3f4f6;
+    --pill-text: #6b7280;
+    --pill-summit-bg: #ede9fe;
+    --pill-summit-text: #5b21b6;
+    --pill-warn-bg: #fef3c7;
+    --pill-warn-text: #92400e;
+    --error-bg: #fef2f2;
+    --error-line: #fecaca;
+    --error-text: #991b1b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 40px 64px; }
+  header.app-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 24px; border-bottom: 1px solid var(--line); margin-bottom: 24px;
+  }
+  .title-group h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+  .title-group .event { color: var(--muted); font-size: 14px; }
+  .controls {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .search {
+    flex: 0 1 380px; padding: 9px 14px; border: 1px solid var(--line);
+    border-radius: 6px; font-size: 14px; color: var(--ink); background: white; outline: none;
+  }
+  .search:focus { border-color: var(--eg-purple); }
+  .search::placeholder { color: #9ca3af; }
+  .btn {
+    padding: 9px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--line); background: white; color: var(--ink); cursor: pointer;
+  }
+  .btn:hover { background: var(--soft); }
+  .btn-primary { background: var(--green); color: white; border-color: var(--green); }
+  .btn-primary:hover { background: var(--green-hover); border-color: var(--green-hover); }
+  .btn:disabled, .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .status { margin-left: auto; color: var(--muted); font-size: 13px; text-align: right; line-height: 1.5; }
+  .status .refreshing { color: var(--eg-purple); }
+  table {
+    width: 100%; border-collapse: collapse; border: 1px solid var(--line);
+    border-radius: 6px; overflow: hidden; background: white;
+  }
+  thead { background: var(--soft); }
+  th {
+    text-align: left; padding: 12px 16px; font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  td { padding: 14px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--soft); }
+  .pill {
+    display: inline-block; padding: 3px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 500; background: var(--pill-bg); color: var(--pill-text);
+  }
+  .pill-summit { background: var(--pill-summit-bg); color: var(--pill-summit-text); }
+  .pill-warn { background: var(--pill-warn-bg); color: var(--pill-warn-text); }
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+  .footnote { margin-top: 16px; color: var(--muted); font-size: 12px; text-align: right; }
+  .error-banner {
+    background: var(--error-bg); border: 1px solid var(--error-line);
+    color: var(--error-text); padding: 12px 16px; border-radius: 6px;
+    margin-bottom: 16px; font-size: 14px;
+  }
+  .spinner {
+    display: inline-block; width: 12px; height: 12px;
+    border: 2px solid var(--line); border-top-color: var(--eg-purple);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="app-header">
+  <div class="title-group">
+    <h1>WBR Booth Staff Report</h1>
+    <div class="event" id="eventLabel">Loading...</div>
+  </div>
+</header>
+
+<div id="errorBanner" style="display:none" class="error-banner"></div>
+
+<div class="controls">
+  <input type="text" class="search" id="search" placeholder="Search by name, company, level..." oninput="render()" />
+  <button class="btn btn-primary" id="downloadBtn" onclick="downloadCSV()">Download CSV</button>
+  <button class="btn" id="refreshBtn" onclick="refresh()">Refresh</button>
+  <div class="status" id="status">Loading...</div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Exhibiting Company</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Email</th>
+      <th>Reg Type</th>
+      <th>Title</th>
+      <th>Level</th>
+      <th>Summit</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<div class="footnote" id="footnote"></div>
+
+</div>
+
+<script>
+let DATA = { event: { name: "" }, rows: [], stats: {}, fetchedAt: null };
+
+function formatTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  if (!q) return DATA.rows;
+  return DATA.rows.filter(r =>
+    [r.exhibiting, r.firstName, r.lastName, r.email, r.company, r.title, r.level]
+      .some(v => (v || '').toLowerCase().includes(q))
+  );
+}
+
+function render() {
+  document.getElementById('eventLabel').textContent = DATA.event?.name || '';
+  const filtered = getFiltered();
+  const tbody = document.getElementById('tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No matching records.</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(r => {
+      const levelCell = r.level
+        ? `<span class="pill">${escapeHtml(r.level)}</span>`
+        : `<span class="pill pill-warn">Unknown</span>`;
+      const summitCell = r.summit
+        ? `<span class="pill pill-summit">${escapeHtml(r.summit)}</span>`
+        : `<span class="pill">—</span>`;
+      return `<tr>
+        <td>${escapeHtml(r.exhibiting)}</td>
+        <td>${escapeHtml(r.firstName)}</td>
+        <td>${escapeHtml(r.lastName)}</td>
+        <td>${escapeHtml(r.email)}</td>
+        <td>${escapeHtml(r.regType)}</td>
+        <td>${escapeHtml(r.title)}</td>
+        <td>${levelCell}</td>
+        <td>${summitCell}</td>
+      </tr>`;
+    }).join('');
+  }
+  const total = DATA.rows.length;
+  const shown = filtered.length;
+  const stats = DATA.stats || {};
+  document.getElementById('status').innerHTML = `
+    ${shown} of ${total} rows<br>
+    Last refreshed ${formatTime(DATA.fetchedAt)} &nbsp;|&nbsp; ${total} staff, ${stats.exhibitors || 0} exhibitors
+  `;
+  document.getElementById('footnote').textContent =
+    `${stats.withSummit || 0} record(s) currently associated with a Summit. Summit derived from Level: prefix before first underscore, kept only if it ends with "Summit".`;
+}
+
+function escapeHtml(s) {
+  return (s || '').toString().replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function loadData(showSpinner) {
+  const banner = document.getElementById('errorBanner');
+  banner.style.display = 'none';
+  const refreshBtn = document.getElementById('refreshBtn');
+  if (showSpinner) {
+    refreshBtn.disabled = true;
+    refreshBtn.innerHTML = '<span class="spinner"></span>Refreshing...';
+  }
+  try {
+    // Cache-bust to avoid stale CDN response
+    const r = await fetch(`data/latest.json?t=${Date.now()}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    DATA = await r.json();
+    render();
+  } catch (e) {
+    banner.style.display = 'block';
+    banner.textContent = `Couldn't load data: ${e.message}. The scraper may not have run yet — try again in a few minutes.`;
+  } finally {
+    refreshBtn.disabled = false;
+    refreshBtn.innerHTML = 'Refresh';
+  }
+}
+
+function refresh() {
+  // For now Refresh just re-pulls the latest cached scrape (updated every 10 min by GitHub Actions)
+  // To trigger a fresh scrape on demand, see README — requires a personal access token
+  loadData(true);
+}
+
+function downloadCSV() {
+  const headers = ['Exhibiting Company','First Name','Last Name','Email','Reg Type','Title','Company','Reg Code','Phone','Level','Summit'];
+  const csv = [headers.join(',')];
+  DATA.rows.forEach(r => {
+    const row = [
+      r.exhibiting, r.firstName, r.lastName, r.email, r.regType, r.title,
+      r.company, r.regCode, r.phone, r.level, r.summit
+    ].map(v => {
+      const s = (v || '').toString();
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    });
+    csv.push(row.join(','));
+  });
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `wbr-booth-staff-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+loadData(false);
+</script>
+</body>
+</html>

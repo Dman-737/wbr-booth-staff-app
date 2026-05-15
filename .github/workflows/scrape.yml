@@ -1,0 +1,50 @@
+name: Scrape ExpoGenie
+
+on:
+  # Manual trigger from the Actions tab or via API (Refresh button)
+  workflow_dispatch:
+  # Every 10 minutes during business hours, every hour otherwise
+  schedule:
+    - cron: "*/10 13-23 * * 1-5"
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Run scraper
+        env:
+          EG_USERNAME: ${{ secrets.EG_USERNAME }}
+          EG_PASSWORD: ${{ secrets.EG_PASSWORD }}
+        run: python scraper.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "ExpoGenie Bot"
+          git config user.email "bot@expo-genie.com"
+          if [ -n "$(git status --porcelain data/)" ]; then
+            git add data/
+            git commit -m "Refresh booth staff data $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          else
+            echo "No changes to commit"
+          fi

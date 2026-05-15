@@ -1,0 +1,28 @@
+{
+  "event": {
+    "slug": "etailboston26",
+    "name": "eTail Boston 2026",
+    "portalUrl": "https://wbr.expo-genie.com/etailboston26"
+  },
+  "fetchedAt": "2026-05-14T22:00:00Z",
+  "stats": {
+    "total": 11,
+    "matched": 9,
+    "unmatched": 2,
+    "withSummit": 1,
+    "exhibitors": 6
+  },
+  "rows": [
+    {"exhibiting":"Yotta","firstName":"Janel","lastName":"Sasso","email":"j.sasso@yottaa.com","company":"Yottaa","title":"Account Executive","regType":"Staff","regDate":"2026-05-12","regCode":"","phone":"","address":"","level":"Tabletop(4)","summit":""},
+    {"exhibiting":"Yotta","firstName":"Chad","lastName":"Sjursen","email":"c.sjursen@yottaa.com","company":"Yottaa","title":"Senior Director of Customer Experience","regType":"Staff","regDate":"2026-05-12","regCode":"","phone":"","address":"","level":"Tabletop(4)","summit":""},
+    {"exhibiting":"Yotta","firstName":"Jonathan","lastName":"Carlson","email":"j.carlson@yottaa.com","company":"Yottaa","title":"VP Marketing","regType":"Staff","regDate":"2026-05-12","regCode":"","phone":"781-254-5166","address":"","level":"Tabletop(4)","summit":""},
+    {"exhibiting":"LIFESIGHT SOFTWARE","firstName":"Tim","lastName":"Barramen","email":"tim@lifesight.io","company":"Lifesight","title":"Account Executive","regType":"Staff","regDate":"2026-05-11","regCode":"","phone":"9145234297","address":"","level":"Lead Gen(2)","summit":""},
+    {"exhibiting":"LIFESIGHT SOFTWARE","firstName":"Allison","lastName":"Wagner","email":"allison@lifesight.io","company":"Lifesight","title":"Director - Agency Partnerships","regType":"Staff","regDate":"2026-05-11","regCode":"","phone":"(+1) 610-334-0490","address":"","level":"Lead Gen(2)","summit":""},
+    {"exhibiting":"True Vault","firstName":"Jillian","lastName":"Straw","email":"jillian@truevault.com","company":"TrueVault","title":"Head of Customer Success","regType":"Staff","regDate":"2026-05-07","regCode":"","phone":"","address":"","level":"Booth(2)","summit":""},
+    {"exhibiting":"True Vault","firstName":"Travis","lastName":"Roderick","email":"travis.roderick@truevault.com","company":"TrueVault","title":"Head of Growth","regType":"Staff","regDate":"2026-05-07","regCode":"","phone":"","address":"","level":"Booth(2)","summit":""},
+    {"exhibiting":"Akamai","firstName":"Mario","lastName":"Portillo","email":"mportill@akamai.com","company":"Akamai","title":"Sr. Field Marketing Manager","regType":"Staff","regDate":"2026-04-29","regCode":"","phone":"5625690491","address":"145 Broadway Cambridge, MA 02142","level":"Booth_Speaker(5)","summit":""},
+    {"exhibiting":"Test.io","firstName":"testy","lastName":"mctesterson","email":"aaron@test.com","company":"Test.io","title":"tester","regType":"Staff","regDate":"2026-04-27","regCode":"","phone":"","address":"","level":"Search and Performance Marketing Summit_Booth_Speaker(4)","summit":"Search and Performance Marketing Summit"},
+    {"exhibiting":"WBR","firstName":"Aaron","lastName":"Zauderer","email":"aaron.zauderer1@wbresearch.com","company":"WBR test","title":"test reg 1","regType":"Staff","regDate":"2026-04-27","regCode":"","phone":"","address":"535 5th Avenue","level":"","summit":""},
+    {"exhibiting":"WBR","firstName":"Aaron","lastName":"Zauderer","email":"aaron.zauderer@wbresearch.com","company":"Worldwide Business Research","title":"TESTER","regType":"Staff","regDate":"2026-04-21","regCode":"","phone":"9145894282","address":"535 5th Avenue","level":"","summit":""}
+  ]
+}
