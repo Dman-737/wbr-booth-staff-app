@@ -63,9 +63,9 @@ def login(page, base_url: str) -> None:
 
 def scrape_user_report(page, base_url: str) -> dict:
     """Return {company_name_lowercase: level_string} from the User Report."""
-    page.goto(f"{base_url}/user-report-result/?report=All+Users", wait_until="networkidle")
+    page.goto(f"{base_url}/user-report-result/?report=All+Users", wait_until="domcontentloaded", timeout=60_000)
     # Wait for the DataTable to render
-    page.wait_for_selector("table tbody tr td", timeout=30_000)
+    page.wait_for_selector("table tbody tr td", timeout=45_000)
     rows = page.evaluate("""() => {
         const t = document.querySelectorAll('table')[0];
         if (!t) return [];
@@ -90,8 +90,8 @@ def scrape_user_report(page, base_url: str) -> dict:
 
 def scrape_booth_staff(page, base_url: str) -> list:
     """Return list of booth staff dicts from the Booth Staff Report."""
-    page.goto(f"{base_url}/booth-staff-report/", wait_until="networkidle")
-    page.wait_for_selector("table tbody tr td", timeout=30_000)
+    page.goto(f"{base_url}/booth-staff-report/", wait_until="domcontentloaded", timeout=60_000)
+    page.wait_for_selector("table tbody tr td", timeout=45_000)
     rows = page.evaluate("""() => {
         // The booth staff table is index 1 (index 0 is sometimes a filter helper)
         const tables = document.querySelectorAll('table');
