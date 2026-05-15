@@ -49,7 +49,10 @@ def login(page, base_url: str) -> None:
     page.fill("#user_login", USERNAME)
     page.fill("#user_pass", PASSWORD)
     page.click("#wp-submit")
-    page.wait_for_url(f"{base_url}/wp-admin/**", timeout=30_000)
+    # WBR's portal doesn't reliably redirect to /wp-admin/, just wait for nav away from login
+    page.wait_for_load_state("networkidle", timeout=30_000)
+    if "wp-login.php" in page.url:
+        raise Exception(f"Login failed - still on wp-login.php. URL: {page.url}")
 
 
 def scrape_user_report(page, base_url: str) -> dict:
