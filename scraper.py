@@ -49,10 +49,16 @@ def login(page, base_url: str) -> None:
     page.fill("#user_login", USERNAME)
     page.fill("#user_pass", PASSWORD)
     page.click("#wp-submit")
-    # WBR's portal doesn't reliably redirect to /wp-admin/, just wait for nav away from login
     page.wait_for_load_state("networkidle", timeout=30_000)
-    if "wp-login.php" in page.url:
-        raise Exception(f"Login failed - still on wp-login.php. URL: {page.url}")
+    # WordPress periodically interrupts admin login with a "confirm admin email" prompt.
+    # If we hit it, dismiss it by following the "remind me later" action.
+    if "action=confirm_admin_email" in page.url:
+        page.goto(f"{base_url}/wp-login.php?action=admin_email_remind_later", wait_until="networkidle")
+    # Verify login by checking for the WordPress auth cookie (URL pattern is unreliable).
+    cookies = page.context.cookies()
+    auth_cookie = next((c for c in cookies if c["name"].startswith("wordpress_logged_in")), None)
+    if not auth_cookie:
+        raise Exception(f"Login failed - no auth cookie. URL: {page.url}")
 
 
 def scrape_user_report(page, base_url: str) -> dict:
